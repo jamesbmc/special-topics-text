@@ -8,10 +8,19 @@ library(stringr)
 library(ggplot2)
 library(rvest)
 
-# Read in web page
+# Use the `read_html` function to load this webpage:
+# https://www.washington.edu/students/crscat/info.html
 
 
-# Extract descriptions of each course into a dataframe (may take multiple steps)
+# Extract the text of each course title from the page by using the `html_nodes`
+# function to identify the *bold paragraphs*. 
+# Extract the text by passing those element to the `html_text` function
+
+# Extract the *descriptions* of each course in the same process as above, searching for 
+# paragraphs (p)
+
+
+# Create a dataframe by combinding your course titles and descriptions (skip the first description)
 
 
 # How many courses are in the catalogue?
