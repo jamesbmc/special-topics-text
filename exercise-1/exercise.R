@@ -8,7 +8,7 @@ library(dplyr)
 library(stringr)
 library(ggplot2)
 
-# Load booksinto a dataframe using the austen_books() function
+# Load Jane Austen books into a dataframe using the austen_books() function
 
 
 # How many books are in the dataset?
