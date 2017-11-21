@@ -7,23 +7,30 @@ library(dplyr)
 library(stringr)
 library(ggplot2)
 library(rvest)
-setwd('~/Documents/info201-s17/m20-text/exercise-2/')
 
-# Read in web page
+# Use the `read_html` function to load this webpage:
+# https://www.washington.edu/students/crscat/info.html
 page <- read_html('https://www.washington.edu/students/crscat/info.html')
 
-# Extract descriptions of each course into a dataframe (may take multiple steps)
-course.titles <- page %>% html_nodes('p b') %>% html_text() 
+# Extract the text of each course title from the page by using the `html_nodes`
+# function to identify the *bold* elements ('b'), then
+# Extract the text by passing those element to the `html_text` function
+course.titles <- page %>% html_nodes('b') %>% html_text() 
+
+# Extract the *descriptions* of each course in the same process as above, searching for 
+# paragraphs (p)
 descriptions <- page %>% html_nodes('p') %>% html_text()
+
+# Create a dataframe by combinding your course titles and descriptions (skip the first description)
 classes <- data.frame(title = course.titles, description = descriptions[2:length(descriptions)], stringsAsFactors = FALSE)
 
 # How many courses are in the catalogue?
 num.courses <- nrow(classes) # 46
 
-# Create a tidytext sturcture of all words
+# Create a tidytext sturcture of all words using the `unnest_tokens` function
 all.words <- classes %>% unnest_tokens(word, description)
 
-# Which words do we use to describe our courses?
+# Which words do we most commonly use to describe informatics courses?
 word.count <- all.words %>% 
   group_by(word) %>% 
   summarize(count = n()) %>% 
@@ -34,26 +41,21 @@ more.stop.words <- data.frame(
   word = c("course", "info", "information"),
   lexicon = "custom"
 )
-all.stop.words <- cbind(stop_words, more.stop.words)
+all.stop.words <- rbind(stop_words, more.stop.words)
 
 # Remove stop words by performing an anti_join with the stop_words dataframe
-no.stop.words <- all.words %>% 
+no.stop.words <- word.count %>% 
   anti_join(all.stop.words, by="word")
 
 # Which non stop-words are most common?
 non.stop.count <- no.stop.words %>%
-  group_by(word) %>% 
-  summarize(count = n()) %>% 
   arrange(-count)
 
 # Use ggplot to make a horizontal bar chart of the word frequencies of non-stop words
-no.stop.words %>% 
-  count(word, sort = TRUE) %>%
-  filter(n > 10) %>%
-  mutate(word = reorder(word, n)) %>%
-  ggplot(aes(word, n)) +
+non.stop.count %>% 
+  filter(count > 10) %>%
+  mutate(word = reorder(word, count)) %>%
+  ggplot(aes(word, count)) +
   geom_col() +
   xlab(NULL) +
   coord_flip()
-
-
